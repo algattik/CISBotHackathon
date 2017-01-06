@@ -1,0 +1,52 @@
+DECLARE @storageAccountName string = "$storageAccountName";
+
+DECLARE @input string = "/botdata/raw/{*}/{*}/{*}/{*}/{*}.json";
+DECLARE @output string = @"wasb://interaction-data@" + @storageAccountName + ".blob.core.windows.net/interactions.csv";
+
+REFERENCE ASSEMBLY [Newtonsoft.Json];
+REFERENCE ASSEMBLY [Microsoft.Analytics.Samples.Formats];
+
+// See explanation of how to parse one JSON per line at https://github.com/Azure/usql/blob/master/Examples/DataFormats/Microsoft.Analytics.Samples.Formats/readme.md
+
+@jsonLines =
+    EXTRACT jsonString string
+    FROM @input
+    USING Extractors.Tsv(quoting : false);
+
+@jsonTuples =
+    SELECT Microsoft.Analytics.Samples.Formats.Json.JsonFunctions.JsonTuple(jsonString) AS rec
+    FROM @jsonLines;
+
+@records =
+    SELECT DateTime.Parse(rec["timestamp"]) AS timestamp,
+           rec["intent"] AS intent,
+           rec["channelId"] AS channelId,
+           rec["id"] AS id,
+           rec["product"] AS product,
+           Double.Parse(rec["score"] ?? "0") AS score,
+           rec["text"] AS text,
+           DateTime.Parse(rec["EventProcessedUtcTime"]) AS EventProcessedUtcTime,
+           Int64.Parse(rec["PartitionId"]) AS PartitionId,
+           DateTime.Parse(rec["EventEnqueuedUtcTime"]) AS EventEnqueuedUtcTime
+    FROM @jsonTuples;
+
+@correlated =
+    SELECT question.intent,
+           question.product,
+           answer.text AS offer,
+           answer.intent == "accepted proposal" ? 1 : 0 AS outcome
+    FROM @records AS question
+         JOIN
+             @records AS answer
+         ON question.id == answer.id
+    WHERE
+    question.intent NOT IN("accepted proposal", "rejected proposal")
+    AND answer.intent IN("accepted proposal", "rejected proposal");
+
+OUTPUT @correlated
+TO @output
+USING Outputters.Csv();
+
+
+
+

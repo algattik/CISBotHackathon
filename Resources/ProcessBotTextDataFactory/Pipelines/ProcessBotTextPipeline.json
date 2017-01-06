@@ -1,0 +1,101 @@
+{
+    "name": "ProcessBotTextPipeline",
+    "properties": {
+        "description": "",
+        "activities": [
+            {
+                "type": "DataLakeAnalyticsU-SQL",
+                "typeProperties": {
+                    "scriptPath": "adf-resources/extract-key-phrases.usql",
+                    "scriptLinkedService": "BlobLinkedService",
+                    "degreeOfParallelism": 3,
+                    "parameters": {
+                        "input": "$$Text.Format('/botdata/raw/{0:yyyy/MM/dd}',WindowStart)",
+                        "output": "$$Text.Format('/botdata/keyphrases/{0:yyyy/MM/dd}/keyphrases.csv',WindowStart)"
+                    }
+                },
+                "inputs": [
+                    {
+                        "name": "BotTextDataset"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "BotKeyPhrasesDataset"
+                    }
+                ],
+                "policy": {
+                    "timeout": "01:00:00",
+                    "concurrency": 1,
+                    "retry": 0,
+                    "delay": "00:00:00"
+                },
+                "scheduler": {
+                    "frequency": "Day",
+                    "interval": 1,
+                    "style": "StartOfInterval"
+                },
+                "name": "Extract key phrases",
+                "linkedServiceName": "DataLakeAnalyticsLinkedService"
+            },
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureDataLakeStoreSource",
+                        "recursive": false
+                    },
+                    "sink": {
+                        "type": "SqlDWSink",
+                        "sqlWriterCleanupScript": "$$Text.Format('delete [dbo].[BotDetailedData] where [EventProcessedUtcTime] >= \\'{0:yyyy-MM-dd HH:mm}\\' AND [EventProcessedUtcTime] <\\'{1:yyyy-MM-dd HH:mm}\\'', WindowStart, WindowEnd)",
+                        "allowPolyBase": true,
+                        "polyBaseSettings": {
+                            "rejectType": "Value",
+                            "rejectValue": "0",
+                            "useTypeDefault": true
+                        },
+                        "writeBatchSize": 0,
+                        "writeBatchTimeout": "00:00:00"
+                    },
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "columnMappings": "timestamp:timestamp,intent:intent,channelId:channelId,id:id,product:product,score:score,text:text,EventProcessedUtcTime:EventProcessedUtcTime,PartitionId:PartitionId,EventEnqueuedUtcTime:EventEnqueuedUtcTime,KeyPhrase:KeyPhrase"
+                    },
+                    "enableStaging": true,
+                    "stagingSettings": {
+                        "linkedServiceName": "BlobLinkedService",
+                        "path": "adfstagingcopydata"
+                    }
+                },
+                "inputs": [
+                    {
+                        "name": "BotKeyPhrasesDataset"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "SqlDwBotDetailedDataset"
+                    }
+                ],
+                "policy": {
+                    "timeout": "1.00:00:00",
+                    "concurrency": 1,
+                    "executionPriorityOrder": "NewestFirst",
+                    "retry": 0,
+                    "longRetry": 0,
+                    "longRetryInterval": "00:00:00"
+                },
+                "scheduler": {
+                    "frequency": "Day",
+                    "interval": 1,
+                    "style": "StartOfInterval"
+                },
+                "name": "Load data to SQL DW"
+            }
+        ],
+        "start": "$startDate",
+        "end": "9999-08-14T00:00:00Z",
+        "isPaused": false,
+        "pipelineMode": "Scheduled"
+    }
+}

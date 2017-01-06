@@ -1,0 +1,81 @@
+DECLARE @input2 string = @input + "/{*}/{*}.json";
+
+REFERENCE ASSEMBLY [Newtonsoft.Json];
+REFERENCE ASSEMBLY [Microsoft.Analytics.Samples.Formats];
+REFERENCE ASSEMBLY [TextCommon];
+REFERENCE ASSEMBLY [TextSentiment];
+REFERENCE ASSEMBLY [TextKeyPhrase];
+
+
+// See explanation of how to parse one JSON per line at https://github.com/Azure/usql/blob/master/Examples/DataFormats/Microsoft.Analytics.Samples.Formats/readme.md
+
+@jsonLines =
+    EXTRACT jsonString string
+    FROM @input2
+    USING Extractors.Tsv(quoting : false);
+
+@jsonTuples =
+    SELECT Microsoft.Analytics.Samples.Formats.Json.JsonFunctions.JsonTuple(jsonString) AS rec
+    FROM @jsonLines;
+
+@records =
+    SELECT DateTime.Parse(rec["timestamp"]) AS timestamp,
+           rec["intent"] AS intent,
+           rec["channelId"] AS channelId,
+           rec["id"] AS id,
+           rec["product"] AS product,
+           Double.Parse(rec["Score"] ?? "0") AS score,
+           rec["text"] AS text,
+           DateTime.Parse(rec["EventProcessedUtcTime"]) AS EventProcessedUtcTime,
+           Int64.Parse(rec["PartitionId"]) AS PartitionId,
+           DateTime.Parse(rec["EventEnqueuedUtcTime"]) AS EventEnqueuedUtcTime
+    FROM @jsonTuples;
+
+@keyphrase =
+    PROCESS @records
+    PRODUCE timestamp,
+            intent,
+            channelId,
+            id,
+            product,
+            score,
+            text,
+            EventProcessedUtcTime,
+            PartitionId,
+            EventEnqueuedUtcTime,
+            KeyPhrase string
+    READONLY timestamp,
+             intent,
+             channelId,
+             id,
+             product,
+             score,
+             text,
+             EventProcessedUtcTime,
+             PartitionId,
+             EventEnqueuedUtcTime
+    USING new Cognition.Text.KeyPhraseExtractor("text");
+
+@kpsplits =
+    SELECT timestamp,
+           intent,
+           channelId,
+           id,
+           product,
+           score,
+           text,
+           EventProcessedUtcTime,
+           PartitionId,
+           EventEnqueuedUtcTime,
+           T.KeyPhrase
+    FROM @keyphrase
+         CROSS APPLY
+             new Cognition.Text.Splitter("KeyPhrase") AS T(KeyPhrase);
+
+OUTPUT @kpsplits
+TO @output
+USING Outputters.Csv();
+
+
+
+

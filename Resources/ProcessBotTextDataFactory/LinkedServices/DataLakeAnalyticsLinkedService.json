@@ -1,0 +1,9 @@
+{
+    "name": "DataLakeAnalyticsLinkedService",
+    "properties": {
+        "type": "AzureDataLakeAnalytics",
+        "typeProperties": {
+            "accountName": "$dataLakeAnalyticsName"
+        }
+    }
+}

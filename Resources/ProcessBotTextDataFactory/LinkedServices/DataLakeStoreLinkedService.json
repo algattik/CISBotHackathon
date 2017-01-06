@@ -1,0 +1,9 @@
+{
+    "name": "DataLakeStoreLinkedService",
+    "properties": {
+        "type": "AzureDataLakeStore",
+        "typeProperties": {
+            "dataLakeStoreUri": "https://$dataLakeStoreName.azuredatalakestore.net/webhdfs/v1"
+        }
+    }
+}

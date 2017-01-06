@@ -1,0 +1,92 @@
+{
+    "name": "BotKeyPhrasesDataset",
+    "properties": {
+        "structure": [
+            {
+                "name": "timestamp",
+                "type": "Datetime"
+            },
+            {
+                "name": "intent",
+                "type": "String"
+            },
+            {
+                "name": "channelId",
+                "type": "String"
+            },
+            {
+                "name": "id",
+                "type": "String"
+            },
+            {
+                "name": "product",
+                "type": "String"
+            },
+            {
+                "name": "score",
+                "type": "Decimal"
+            },
+            {
+                "name": "text",
+                "type": "String"
+            },
+            {
+                "name": "EventProcessedUtcTime",
+                "type": "Datetime"
+            },
+            {
+                "name": "PartitionId",
+                "type": "Int64"
+            },
+            {
+                "name": "EventEnqueuedUtcTime",
+                "type": "Datetime"
+            },
+            {
+                "name": "KeyPhrase",
+                "type": "String"
+            }
+        ],
+        "type": "AzureDataLakeStore",
+        "linkedServiceName": "DataLakeStoreLinkedService",
+        "typeProperties": {
+      "folderPath": "botdata/keyphrases/{Year}/{Month}/{Day}",
+      "partitionedBy": [
+        {
+          "name": "Year",
+          "value": {
+            "type": "DateTime",
+            "date": "SliceStart",
+            "format": "yyyy"
+          }
+        },
+        {
+          "name": "Month",
+          "value": {
+            "type": "DateTime",
+            "date": "SliceStart",
+            "format": "MM"
+          }
+        },
+        {
+          "name": "Day",
+          "value": {
+            "type": "DateTime",
+            "date": "SliceStart",
+            "format": "dd"
+          }
+        }
+      ],
+            "format": {
+                "type": "TextFormat",
+                "columnDelimiter": ",",
+                "quoteChar": "\""
+            }
+        },
+        "availability": {
+            "frequency": "Day",
+            "interval": 1,
+            "style": "StartOfInterval"
+        }
+    }
+}

@@ -1,0 +1,64 @@
+{
+    "name": "SqlDwBotDetailedDataset",
+    "properties": {
+        "structure": [
+            {
+                "name": "timestamp",
+                "type": "Datetime"
+            },
+            {
+                "name": "intent",
+                "type": "String"
+            },
+            {
+                "name": "channelId",
+                "type": "String"
+            },
+            {
+                "name": "id",
+                "type": "String"
+            },
+            {
+                "name": "product",
+                "type": "String"
+            },
+            {
+                "name": "score",
+                "type": "Decimal"
+            },
+            {
+                "name": "text",
+                "type": "String"
+            },
+            {
+                "name": "EventProcessedUtcTime",
+                "type": "Datetime"
+            },
+            {
+                "name": "PartitionId",
+                "type": "Int64"
+            },
+            {
+                "name": "EventEnqueuedUtcTime",
+                "type": "Datetime"
+            },
+            {
+                "name": "KeyPhrase",
+                "type": "String"
+            }
+        ],
+        "published": false,
+        "type": "AzureSqlDWTable",
+        "linkedServiceName": "SqlDwLinkedService",
+        "typeProperties": {
+            "tableName": "[dbo].[BotDetailedData]"
+        },
+        "availability": {
+            "frequency": "Day",
+            "interval": 1,
+            "style": "StartOfInterval"
+        },
+        "external": false,
+        "policy": {}
+    }
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "intent": {
+      "type": "string"
+    },
+    "channelId": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "product": {
+      "type": "string"
+    },
+    "serviceUrl": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "userid": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "intent",
+    "channelId",
+    "id",
+    "product",
+    "serviceUrl",
+    "text",
+    "timestamp",
+    "type",
+    "userid",
+    "username"
+  ],
+  "type": "object"
+}
