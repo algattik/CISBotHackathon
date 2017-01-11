@@ -6,14 +6,14 @@ $scriptDir=($PSScriptRoot, '.' -ne "")[0]
 Write-Host "Create a Stream Analytics job..."  -ForegroundColor Green
 
 $eventHubListenPolicyKey=(Get-AzureRmEventHubNamespaceKey -ResourceGroupName $resourceGroupName -NamespaceName $eventHubNamespace -AuthorizationRuleName $eventHubListenPolicyName).PrimaryConnectionString
-
+$eventHubListenPolicySASKey=[regex]::Match($eventHubListenPolicyKey, ';SharedAccessKey=([^;]+)').Captures.Groups[1].Value
 
 $temp=New-TemporaryFile
 substituteInTemplate ..\Resources\FromEventHubStreamAnalytics\Definition.json @{
  '$eventHubName' = $eventHubName
  '$eventHubNamespace' = $eventHubNamespace
  '$eventHubListenPolicyName' = $eventHubListenPolicyName
- '$eventHubListenPolicyKey' = $eventHubListenPolicyKey
+ '$eventHubListenPolicyKey' = $eventHubListenPolicySASKey
  '$location' = $location
 } | Out-File $temp
 
