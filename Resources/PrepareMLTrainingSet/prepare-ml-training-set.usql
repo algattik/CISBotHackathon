@@ -30,20 +30,28 @@ REFERENCE ASSEMBLY [Microsoft.Analytics.Samples.Formats];
            DateTime.Parse(rec["EventEnqueuedUtcTime"]) AS EventEnqueuedUtcTime
     FROM @jsonTuples;
 
-@correlated =
-    SELECT question.intent,
-           question.product,
-           answer.text AS offer,
-           answer.intent == "accepted proposal" ? 1 : 0 AS outcome
-    FROM @records AS question
-         JOIN
-             @records AS answer
-         ON question.id == answer.id
-    WHERE
-    question.intent NOT IN("accepted proposal", "rejected proposal")
-    AND answer.intent IN("accepted proposal", "rejected proposal");
 
-OUTPUT @correlated
+@correlatedMessages =
+    SELECT intent,
+           product,
+           LEAD(text) OVER (PARTITION BY id ORDER BY timestamp) AS nextText,
+           LEAD(intent) OVER (PARTITION BY id ORDER BY timestamp) AS nextIntent
+    FROM @records
+;
+
+@intentsOffersAndOutcomes =
+    SELECT intent,
+           product,
+           nextText AS offer,
+           nextIntent == "accepted proposal" ? 1 : 0 AS outcome
+    FROM @correlatedMessages
+    WHERE
+    intent NOT IN("accepted proposal", "rejected proposal")
+    AND nextIntent IN("accepted proposal", "rejected proposal")
+    ORDER BY timestamp
+;
+
+OUTPUT @intentsOffersAndOutcomes
 TO @output
 USING Outputters.Csv();
 

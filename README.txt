@@ -17,10 +17,8 @@ High:
 
 Medium:
 
-- Commit to GitHub
 - Improve very slow "conversation simulator". I tried parallelizing execution
   but that resulted in Server errors (throttling?)
-- Improve correlation logic in prepare-ml-training-set.usql
 
 Low:
 
