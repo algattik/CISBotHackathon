@@ -11,19 +11,11 @@ How to build and run:
 
 *** TODO ***
 
-High:
-
-- Add more background information to instructions
-
-Medium:
-
+- Add event correlation to Stream Analytics job to output dataset to Power BI
+  allowing to show the offer acceptance rate over time. It should show it
+  increasing from 50% to over 60% after enabling the Azure ML model
 - Improve very slow "conversation simulator". I tried parallelizing execution
   but that resulted in Server errors (throttling?)
-
-Low:
-
 - Automate Azure Function creation
 - Automate Logic App creation
-
-*** NOTES ***
 
