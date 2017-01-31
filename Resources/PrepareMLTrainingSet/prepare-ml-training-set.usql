@@ -48,7 +48,6 @@ REFERENCE ASSEMBLY [Microsoft.Analytics.Samples.Formats];
     WHERE
     intent NOT IN("accepted proposal", "rejected proposal")
     AND nextIntent IN("accepted proposal", "rejected proposal")
-    ORDER BY timestamp
 ;
 
 OUTPUT @intentsOffersAndOutcomes
