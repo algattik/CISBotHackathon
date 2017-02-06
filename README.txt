@@ -16,6 +16,12 @@ How to build and run:
   increasing from 50% to over 60% after enabling the Azure ML model
 - Improve very slow "conversation simulator". I tried parallelizing execution
   but that resulted in Server errors (throttling?)
+- In ML, filter out noise (None intent)
+- Order ML training set by time
+- In PowerPoint, advise users to look at the ADL JSON files and the training
+  CSV file before starting with ML
+- In PowerPoint, add slides with background info about each product (e.g. Event
+  Hubs)
+- In PowerPoint, explain choice of regression model
 - Automate Azure Function creation
 - Automate Logic App creation
-
