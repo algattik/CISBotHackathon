@@ -2,7 +2,6 @@ DECLARE @input2 string = @input + "/{*}/{*}.json";
 
 REFERENCE ASSEMBLY [Newtonsoft.Json];
 REFERENCE ASSEMBLY [Microsoft.Analytics.Samples.Formats];
-REFERENCE ASSEMBLY [TextCommon];
 REFERENCE ASSEMBLY [TextSentiment];
 REFERENCE ASSEMBLY [TextKeyPhrase];
 
@@ -70,7 +69,8 @@ REFERENCE ASSEMBLY [TextKeyPhrase];
            T.KeyPhrase
     FROM @keyphrase
          CROSS APPLY
-             new Cognition.Text.Splitter("KeyPhrase") AS T(KeyPhrase);
+             EXPLODE(new SQL.ARRAY<string>(KeyPhrase.Split(';'))) AS T(KeyPhrase);
+
 
 OUTPUT @kpsplits
 TO @output
